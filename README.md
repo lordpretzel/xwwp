@@ -5,6 +5,24 @@ functionnalities.
 
 ![CI](https://github.com/canatella/xwwp/workflows/CI/badge.svg?branch=master)
 
+Notice: development is moved to master branch!
+
+## Keyboard navigation
+
+Use `xwwp-ace-toggle` to trigger an `ace-jump` style selection of currently
+visible interactable element.
+
+![Imgur](https://imgur.com/kR0QAPA.gif)
+
+## DWIM style `M-x xwwp`, with completion based on browsing history
+
+DWIM style command adapted from `eww`, smarter than the original `xwidget-webkit-browse-url`.
+Automatically prefixes and expands the url, and use `xwwp-search-prefix` to search for it
+if input doesn't look like an URL or a domain name.
+
+If called with a prefix ARG, create a new Webkit session instead of reusing
+the default Webkit session.
+
 ## Follow link
 
 Using `xwwp-follow-link` to choose a link on the current web
@@ -18,14 +36,17 @@ with your backend of choice and I'll have a look at what can be done. Or better,
 fork and create a pull request, most of the needed code is already there, it
 just needs to be hooked.
 
-## DWIM style `M-x xwwp`
+## Navigate between sections
 
-DWIM style command adapted from `eww`, smarter than the original `xwidget-webkit-browse-url`.
-Automatically prefixes and expands the url, and use `xwwp-search-prefix` to search for it
-if input doesn't look like an URL or a domain name.
+`M-x xwwp-section`
 
-If called with a prefix ARG, create a new Webkit session instead of reusing
-the default Webkit session.
+![Imgur](https://imgur.com/boREIZF.gif)
+
+## Browser History
+
+`M-x xwwp-history-show`
+
+![Imgur](https://imgur.com/Su1xEJr.png)
 
 ## Browse url in other window
 
@@ -38,12 +59,13 @@ front using `swith-to-buffer-other-window`.
 
 Clone the repo locally and
 ```
-(use-package xwwp-follow-link
-  :load-path "~/.emacs.d/xwwp-follow-link"
+(use-package xwwp-full
+  :load-path "~/.emacs.d/xwwp"
   :custom
-  (xwwp-follow-link-completion-system 'ivy)
+  (xwwp-follow-link-completion-system 'helm)
   :bind (:map xwidget-webkit-mode-map
-              ("v" . xwwp-follow-link)))
+              ("v" . xwwp-follow-link)
+              ("t" . xwwp-ace-toggle)))
 ```
 
 Or via Melpa `M-x package-install xwwp`,

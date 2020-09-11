@@ -1,13 +1,13 @@
 ;;; xwwp.el --- Enhance xwidget webkit browser -*- lexical-binding: t; -*-
 
-;; Author: Damien Merenne
+;; Author: Damien Merenne, Q. Hong
 ;; URL: https://github.com/canatella/xwwp
 ;; Created: 2020-03-11
 ;; Keywords: convenience
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "26.1"))
 
-;; Copyright (C) 2020 Damien Merenne <dam@cosinux.org>
+;; Copyright (C) 2020 Damien Merenne <dam@cosinux.org>, Q. Hong <qhong@mit.edu>
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -43,6 +43,8 @@
 (require 'json)
 (require 'subr-x)
 (require 'xwidget)
+
+(defconst xwwp-source-directory (file-name-directory (or load-file-name buffer-file-name)))
 
 (defun xwwp-css-make-class (class style)
   "Generate a css CLASS definition from the STYLE alist."
@@ -178,28 +180,28 @@ word(s) will be searched for via `xwwp-search-prefix'.
 If called with a prefix ARG, create a new Webkit buffer instead of reusing
 the default Webkit buffer."
   (interactive
-   (let* ((uris (eww-suggested-uris))
-	      (prompt (concat "Enter URL or keywords"
-			              (if uris (format " (default %s)" (car uris)) "")
-			              ": ")))
-     (list (read-string prompt nil 'eww-prompt-history uris)
+   (let ((prompt "Enter URL or keywords: "))
+     (list (if (require 'xwwp-history nil t)
+               (xwwp-history-completing-read prompt "")
+             (read-string prompt nil 'eww-prompt-history ""))
            (prefix-numeric-value current-prefix-arg))))
-  (setq url
-        (let ((eww-search-prefix xwwp-search-prefix))
-          (eww--dwim-expand-url url)))
-  ;; Check whether the domain only uses "Highly Restricted" Unicode
-  ;; IDNA characters.  If not, transform to punycode to indicate that
-  ;; there may be funny business going on.
-  (let ((parsed (url-generic-parse-url url)))
-    (when (url-host parsed)
-      (unless (puny-highly-restrictive-domain-p (url-host parsed))
-        (setf (url-host parsed) (puny-encode-domain (url-host parsed)))))
-    ;; When the URL is on the form "http://a/../../../g", chop off all
-    ;; the leading "/.."s.
-    (when (url-filename parsed)
-      (while (string-match "\\`/[.][.]/" (url-filename parsed))
-        (setf (url-filename parsed) (substring (url-filename parsed) 3))))
-    (setq url (url-recreate-url parsed)))
+  (when url
+    (setq url
+          (let ((eww-search-prefix xwwp-search-prefix))
+            (eww--dwim-expand-url url)))
+    ;; Check whether the domain only uses "Highly Restricted" Unicode
+    ;; IDNA characters.  If not, transform to punycode to indicate that
+    ;; there may be funny business going on.
+    (let ((parsed (url-generic-parse-url url)))
+      (when (url-host parsed)
+        (unless (puny-highly-restrictive-domain-p (url-host parsed))
+          (setf (url-host parsed) (puny-encode-domain (url-host parsed)))))
+      ;; When the URL is on the form "http://a/../../../g", chop off all
+      ;; the leading "/.."s.
+      (when (url-filename parsed)
+        (while (string-match "\\`/[.][.]/" (url-filename parsed))
+          (setf (url-filename parsed) (substring (url-filename parsed) 3))))
+      (setq url (url-recreate-url parsed))))
   (xwwp-browse-url-other-window url (eq arg 4)))
 
 
